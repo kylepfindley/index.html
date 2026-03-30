@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>True Love Matcher</title>
+  <style>
+    :root{ --accent:#6a0dad; --bg:#e6f2ff; --card:#ffffff; --muted:#556 }
+    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:var(--bg); margin:0; padding:2rem; color:#111}
+    .wrapper{max-width:900px;margin:0 auto}
+    header{background:var(--card);border:4px solid var(--accent);padding:1rem;border-radius:10px;text-align:center}
+    h1{margin:.2rem 0}
+    .instructions{margin:1rem 0;padding:.75rem;background:#fbfeff;border-radius:6px;border:1px solid #e6f3ff}
+    form{margin-top:1rem;background:var(--card);padding:1rem;border-radius:8px;border:3px solid var(--accent)}
+    .q{margin:0.75rem 0;padding:0.5rem}
+    label{display:block;margin-bottom:.25rem;font-weight:600}
+    select{padding:.4rem;border:1px solid #ccc;border-radius:6px}
+    button{background:var(--accent);color:#fff;padding:.6rem 1rem;border:none;border-radius:6px;cursor:pointer}
+    button:disabled{opacity:.6}
+    .results{margin-top:1rem;padding:1rem;background:#fff;border-radius:8px;border:1px solid #ddd}
+    .per-q{margin:.5rem 0;padding:.5rem;border-bottom:1px dashed #eee}
+    .error{color:#b00020;margin-top:.5rem}
+    .summary{font-weight:700;margin-top:.5rem}
+    ul{list-style-type:square}
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1>True Love Matcher</h1>
+      <p class="small">&ldquo;Answer five statements (1 = strongly disagree, 5 = strongly agree). Your answers are compared to my desired answers.&rdquo;</p>
+    </header>
+
+    <section class="instructions">
+      <strong>How it works:</strong>
+      <ul>
+        <li>Answer each statement with 1–5.</li>
+        <li>We compute per-question compatibility and an overall percentage.</li>
+        <li>Results include a closing remark based on thresholds.</li>
+      </ul>
+    </section>
+
+    <form id="match-form" novalidate>
+      <div class="q">
+        <label for="q1">1. I enjoy outdoor adventures (hiking, camping, backpacking).</label>
+        <select id="q1" name="q1">
+          <option value="">Select 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        </select>
+      </div>
+
+      <div class="q">
+        <label for="q2">2. I like trying new foods and exotic dishes.</label>
+        <select id="q2" name="q2">
+          <option value="">Select 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        </select>
+      </div>
+
+      <div class="q">
+        <label for="q3">3. I enjoy quiet nights in as much as going out.</label>
+        <select id="q3" name="q3">
+          <option value="">Select 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        </select>
+      </div>
+
+      <div class="q">
+        <label for="q4">4. I prefer planning ahead rather than being spontaneous.</label>
+        <select id="q4" name="q4">
+          <option value="">Select 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        </select>
+      </div>
+
+      <div class="q">
+        <label for="q5">5. I enjoy music and concerts frequently.</label>
+        <select id="q5" name="q5">
+          <option value="">Select 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        </select>
+      </div>
+
+      <div>
+        <button type="submit">Check Compatibility</button>
+        <div id="error" class="error" aria-live="polite"></div>
+      </div>
+    </form>
+
+    <div id="results" class="results" hidden>
+      <h2>Results</h2>
+      <div id="per-question"></div>
+      <div id="overall" class="summary"></div>
+      <div id="closing" style="margin-top:.5rem;font-style:italic"></div>
+    </div>
+  </div>
+
+  <script>
+    // Constants (Requirement 4: use constants at top)
+    const DESIRED = [5,4,3,2,4]; // desired answers for q1..q5
+    const TRUE_LOVE_THRESHOLD = 85; // percent
+    const FRIENDS_THRESHOLD = 60;   // percent
+    const RUN_AWAY_THRESHOLD = 30;  // percent
+
+    // validate(values) single function for all questions (Requirement 4)
+    function validate(values){
+      const errors = [];
+      for(let i=0;i<values.length;i++){
+        const v = Number(values[i]);
+        if(!v || v < 1 || v > 5 || Number.isNaN(v)){
+          errors.push('Question ' + (i+1) + ' requires a value 1–5.');
+        }
+      }
+      return errors;
+    }
+
+    // compute per-question and overall compatibility
+    function computeCompatibility(answers){
+      // per-question: 100 - (abs diff / 4 * 100)
+      const per = answers.map((a,i)=>{
+        const diff = Math.abs(a - DESIRED[i]);
+        const pct = Math.round(100 - (diff/4)*100);
+        return {diff,pct};
+      });
+      const totalPct = Math.round(per.reduce((s,p)=>s+p.pct,0) / per.length);
+      return {per,totalPct};
+    }
+
+    // handle submit
+    document.getElementById('match-form').addEventListener('submit', function(e){
+      e.preventDefault();
+      const errorEl = document.getElementById('error'); errorEl.textContent = '';
+      const answers = [];
+      for(let i=1;i<=5;i++){ answers.push(document.getElementById('q'+i).value); }
+      const errors = validate(answers);
+      if(errors.length){
+        errorEl.textContent = errors.join(' ');
+        document.getElementById('results').hidden = true;
+        return;
+      }
+      const numeric = answers.map(x=>Number(x));
+      const res = computeCompatibility(numeric);
+
+      // display per-question summaries
+      const perEl = document.getElementById('per-question'); perEl.innerHTML = '';
+      res.per.forEach((p,i)=>{
+        const div = document.createElement('div'); div.className = 'per-q';
+        div.innerHTML = '<strong>Question ' + (i+1) + ':</strong> desired ' + DESIRED[i] + ', you answered ' + numeric[i] + '. Compatibility: ' + p.pct + '% (difference ' + p.diff + ')';
+        perEl.appendChild(div);
+      });
+
+      // overall
+      document.getElementById('overall').textContent = 'Overall compatibility: ' + res.totalPct + '%';
+
+      // closing remark based on thresholds
+      const closingEl = document.getElementById('closing');
+      if(res.totalPct >= TRUE_LOVE_THRESHOLD){
+        closingEl.textContent = 'Result: True love! You and I are an excellent match — let’s start planning adventures together.';
+      } else if(res.totalPct >= FRIENDS_THRESHOLD){
+        closingEl.textContent = 'Result: Possible friends — there is good compatibility; with time it might grow.';
+      } else if(res.totalPct >= RUN_AWAY_THRESHOLD){
+        closingEl.textContent = 'Result: Caution — differences are notable; you might be better as acquaintances.';
+      } else {
+        closingEl.textContent = 'Result: Run away! Our answers are quite different — unlikely a good match.';
+      }
+
+      document.getElementById('results').hidden = false;
+    });
+  </script>
+</body>
+</html> 
