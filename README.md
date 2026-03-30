@@ -1,35 +1,283 @@
- this assignment you will develop and test a Web application using HTML, CSS, and JavaScript that asks questions to determine if a person is your true love. More specifically your application should ask five questions in the form of statements and allow the user to respond to each statement with the numbers 1 through 5 with 1 indicating strongly disagree and 5 indicating strongly agree. You will then compare the person’s answers with your desired “true love” answers. The closer the answers are to your desired “true love” answers the better match the two of you are for each other.
+ <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>True Love Matcher</title>
 
-For example, suppose you choose the statement “Broccoli is delicious.” and your desired answer was 1 (strongly disagree) because you really don’t like broccoli. If the application user entered 4 (agree), then the two of you would not be a very good match based on that question. In the broccoli example above you would want to calculate your question compatibility score for this question by taking the absolute value of the difference between their answer and your desired answer.
+  <style>
+    :root { --accent:#6a0dad; --bg:#e6f2ff; --card:#ffffff; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: var(--bg);
+      margin: 0;
+      padding: 2rem;
+    }
+    .wrapper { max-width:900px; margin:auto; }
+    header {
+      background: var(--card);
+      border:4px solid var(--accent);
+      padding:1rem;
+      border-radius:10px;
+      text-align:center;
+    }
+    form {
+      margin-top:1rem;
+      background:white;
+      padding:1rem;
+      border-radius:8px;
+      border:3px solid var(--accent);
+    }
+    label { font-weight:600; }
+    select {
+      padding:.4rem;
+      border-radius:6px;
+      margin-top:.25rem;
+    }
+    button {
+      background:var(--accent);
+      color:white;
+      padding:.6rem 1rem;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+    }
+    .results {
+      margin-top:1rem;
+      padding:1rem;
+      background:white;
+      border-radius:8px;
+      border:1px solid #ddd;
+    }
+    ul { list-style-type:square; }
+    .error { color:red; }
+  </style>
+</head>
 
-After all five questions are answered, you will need to add up the question compatibility scores for each of the questions and subtract the value from 100 to calculate a final compatibility score that has a maximum value of 100.
+<body>
+<main class="wrapper">
 
-You will also need to set three threshold scores. One for “true love,” one for possible “friends,” and one for “run away.” You utilize your programming knowledge, creativity, and good taste to set and adjust the thresholds, phase the results, and share the results to the user. Be sure to review and test your ideas for the application with a friend or classmate to get some usability feedback.
+<header>
+  <h1>True Love Matcher</h1>
+  <p>“Answer five statements (1 = strongly disagree, 5 = strongly agree).”</p>
+</header>
 
-If you are looking for some examples of what this application might look like if it was a command line application and Dr. Klump was creating it, you can see it here [link]. I’m sure you can improve on his design.
+<section>
+  <p><strong>How it works:</strong></p>
+  <ul>
+    <li>Answer each question from 1–5</li>
+    <li>We calculate compatibility</li>
+    <li>You get a final result</li>
+  </ul>
+</section>
 
-Requirement 1
-Create an application that:
+<form id="match-form" novalidate>
 
-Is implemented in a single file name “index.html” or with separate CSS and JavaScript files
-Is hosted as a public website using GitHub Pages or Microsoft Azure
-Has a simple yet an aesthetically pleasing user interface
-Includes user instructions that succinctly describes the application and how it works
-Requirement 2
-Be sure that the application also:
+  <div>
+    <label for="q1">1. I enjoy outdoor adventures</label>
+    <select id="q1" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
 
-Asks five questions as described above
-Calculates question compatibility scores for each question
-Calculates the total compatibility scores across all questions
-Requirement 3
-Enhance the application so that it:
+  <div>
+    <label for="q2">2. I like trying new foods</label>
+    <select id="q2" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
 
-Displays a summary of each question’s compatibility score
-Displays a summary of the overall compatibility score as a percentage
-Displays an interesting closing remark based on the identified threshold scores
-Validates user input, displays meaningful error messages as, and asks the question again as needed
-Requirement 4
-Finally test and refactor the application so that it:
+  <div>
+    <label for="q3">3. I enjoy quiet nights</label>
+    <select id="q3" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
 
-Utilizes constants at the top of the file or in a separate file where possible
-Utilizes a single function called “validate” to validate user input and displays and error message for all questions as needed
+  <div>
+    <label for="q4">4. I prefer planning ahead</label>
+    <select id="q4" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="q5">5. I enjoy music and concerts</label>
+    <select id="q5" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+
+  <br>
+  <button type="submit">Check Compatibility</button>
+  <p id="error" class="error"></p>
+</form>
+
+<div id="results" class="results" hidden>
+  <h2>Results</h2>
+  <div id="overall"></div>
+  <div id="closing"></div>
+</div>
+
+</main>
+
+<script>
+const DESIRED = [5,4,3,2,4];
+
+function validate(values){
+  for(let v of values){
+    if(!v || v < 1 || v > 5) return false;
+  }
+  return true;
+}
+
+document.getElementById('match-form').addEventListener('submit', function(e){
+  e.preventDefault();
+
+  const answers = [];
+  for(let i=1;i<=5;i++){
+    answers.push(Number(document.getElementById('q'+i).value));
+  }
+
+  if(!validate(answers)){
+    document.getElementById('error').textContent = "Please answer all questions.";
+    return;
+  }
+
+  let total = 0;
+  for(let i=0;i<5;i++){
+    let diff = Math.abs(answers[i] - DESIRED[i]);
+    total += (100 - (diff/4)*100);
+  }
+
+  let percent = Math.round(total / 5);
+
+  document.getElementById('overall').textContent = "Compatibility: " + percent + "%";
+
+  let result = "";
+  if(percent >= 85) result = "True Love ❤️";
+  else if(percent >= 60) result = "Good Match 👍";
+  else if(percent >= 30) result = "Maybe Friends 🤝";
+  else result = "Run Away 🚨";
+
+  document.getElementById('closing').textContent = result;
+  document.getElementById('results').hidden = false;
+});
+</script>
+
+</body>
+</html>        </select>
+      </div>
+
+      <div>
+        <button type="submit">Check Compatibility</button>
+        <div id="error" class="error" aria-live="polite"></div>
+      </div>
+    </form>
+
+    <div id="results" class="results" hidden>
+      <h2>Results</h2>
+      <div id="per-question"></div>
+      <div id="overall" class="summary"></div>
+      <div id="closing" style="margin-top:.5rem;font-style:italic"></div>
+    </div>
+  </div>
+
+  <script>
+    // Constants (Requirement 4: use constants at top)
+    const DESIRED = [5,4,3,2,4]; // desired answers for q1..q5
+    const TRUE_LOVE_THRESHOLD = 85; // percent
+    const FRIENDS_THRESHOLD = 60;   // percent
+    const RUN_AWAY_THRESHOLD = 30;  // percent
+
+    // validate(values) single function for all questions (Requirement 4)
+    function validate(values){
+      const errors = [];
+      for(let i=0;i<values.length;i++){
+        const v = Number(values[i]);
+        if(!v || v < 1 || v > 5 || Number.isNaN(v)){
+          errors.push('Question ' + (i+1) + ' requires a value 1–5.');
+        }
+      }
+      return errors;
+    }
+
+    // compute per-question and overall compatibility
+    function computeCompatibility(answers){
+      // per-question: 100 - (abs diff / 4 * 100)
+      const per = answers.map((a,i)=>{
+        const diff = Math.abs(a - DESIRED[i]);
+        const pct = Math.round(100 - (diff/4)*100);
+        return {diff,pct};
+      });
+      const totalPct = Math.round(per.reduce((s,p)=>s+p.pct,0) / per.length);
+      return {per,totalPct};
+    }
+
+    // handle submit
+    document.getElementById('match-form').addEventListener('submit', function(e){
+      e.preventDefault();
+      const errorEl = document.getElementById('error'); errorEl.textContent = '';
+      const answers = [];
+      for(let i=1;i<=5;i++){ answers.push(document.getElementById('q'+i).value); }
+      const errors = validate(answers);
+      if(errors.length){
+        errorEl.textContent = errors.join(' ');
+        document.getElementById('results').hidden = true;
+        return;
+      }
+      const numeric = answers.map(x=>Number(x));
+      const res = computeCompatibility(numeric);
+
+      // display per-question summaries
+      const perEl = document.getElementById('per-question'); perEl.innerHTML = '';
+      res.per.forEach((p,i)=>{
+        const div = document.createElement('div'); div.className = 'per-q';
+        div.innerHTML = '<strong>Question ' + (i+1) + ':</strong> desired ' + DESIRED[i] + ', you answered ' + numeric[i] + '. Compatibility: ' + p.pct + '% (difference ' + p.diff + ')';
+        perEl.appendChild(div);
+      });
+
+      // overall
+      document.getElementById('overall').textContent = 'Overall compatibility: ' + res.totalPct + '%';
+
+      // closing remark based on thresholds
+      const closingEl = document.getElementById('closing');
+      if(res.totalPct >= TRUE_LOVE_THRESHOLD){
+        closingEl.textContent = 'Result: True love! You and I are an excellent match — let’s start planning adventures together.';
+      } else if(res.totalPct >= FRIENDS_THRESHOLD){
+        closingEl.textContent = 'Result: Possible friends — there is good compatibility; with time it might grow.';
+      } else if(res.totalPct >= RUN_AWAY_THRESHOLD){
+        closingEl.textContent = 'Result: Caution — differences are notable; you might be better as acquaintances.';
+      } else {
+        closingEl.textContent = 'Result: Run away! Our answers are quite different — unlikely a good match.';
+      }
+
+      document.getElementById('results').hidden = false;
+    });
+  </script>
+</body>
