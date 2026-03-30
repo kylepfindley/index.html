@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>True Love Matcher</title>
+
+  <style>
+    :root { --accent:#6a0dad; --bg:#e6f2ff; --card:#ffffff; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: var(--bg);
+      margin: 0;
+      padding: 2rem;
+    }
+    .wrapper { max-width:900px; margin:auto; }
+    header {
+      background: var(--card);
+      border:4px solid var(--accent);
+      padding:1rem;
+      border-radius:10px;
+      text-align:center;
+    }
+    form {
+      margin-top:1rem;
+      background:white;
+      padding:1rem;
+      border-radius:8px;
+      border:3px solid var(--accent);
+    }
+    label { font-weight:600; }
+    select {
+      padding:.4rem;
+      border-radius:6px;
+      margin-top:.25rem;
+    }
+    button {
+      background:var(--accent);
+      color:white;
+      padding:.6rem 1rem;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+    }
+    .results {
+      margin-top:1rem;
+      padding:1rem;
+      background:white;
+      border-radius:8px;
+      border:1px solid #ddd;
+    }
+    ul { list-style-type:square; }
+    .error { color:red; }
+  </style>
+</head>
+
+<body>
+<main class="wrapper">
+
+<header>
+  <h1>True Love Matcher</h1>
+  <p>“Answer five statements (1 = strongly disagree, 5 = strongly agree).”</p>
+</header>
+
+<section>
+  <p><strong>How it works:</strong></p>
+  <ul>
+    <li>Answer each question from 1–5</li>
+    <li>We calculate compatibility</li>
+    <li>You get a final result</li>
+  </ul>
+</section>
+
+<form id="match-form" novalidate>
+
+  <div>
+    <label for="q1">1. I enjoy outdoor adventures</label>
+    <select id="q1" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="q2">2. I like trying new foods</label>
+    <select id="q2" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="q3">3. I enjoy quiet nights</label>
+    <select id="q3" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="q4">4. I prefer planning ahead</label>
+    <select id="q4" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="q5">5. I enjoy music and concerts</label>
+    <select id="q5" required>
+      <option value="">Select</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+    </select>
+  </div>
+
+  <br>
+  <button type="submit">Check Compatibility</button>
+  <p id="error" class="error"></p>
+</form>
+
+<div id="results" class="results" hidden>
+  <h2>Results</h2>
+  <div id="overall"></div>
+  <div id="closing"></div>
+</div>
+
+</main>
+
+<script>
+const DESIRED = [5,4,3,2,4];
+
+function validate(values){
+  for(let v of values){
+    if(!v || v < 1 || v > 5) return false;
+  }
+  return true;
+}
+
+document.getElementById('match-form').addEventListener('submit', function(e){
+  e.preventDefault();
+
+  const answers = [];
+  for(let i=1;i<=5;i++){
+    answers.push(Number(document.getElementById('q'+i).value));
+  }
+
+  if(!validate(answers)){
+    document.getElementById('error').textContent = "Please answer all questions.";
+    return;
+  }
+
+  let total = 0;
+  for(let i=0;i<5;i++){
+    let diff = Math.abs(answers[i] - DESIRED[i]);
+    total += (100 - (diff/4)*100);
+  }
+
+  let percent = Math.round(total / 5);
+
+  document.getElementById('overall').textContent = "Compatibility: " + percent + "%";
+
+  let result = "";
+  if(percent >= 85) result = "True Love ❤️";
+  else if(percent >= 60) result = "Good Match 👍";
+  else if(percent >= 30) result = "Maybe Friends 🤝";
+  else result = "Run Away 🚨";
+
+  document.getElementById('closing').textContent = result;
+  document.getElementById('results').hidden = false;
+});
+</script>
+
+</body>
+</html>        </select>
+      </div>
+
+      <div>
+        <button type="submit">Check Compatibility</button>
+        <div id="error" class="error" aria-live="polite"></div>
+      </div>
+    </form>
+
+    <div id="results" class="results" hidden>
+      <h2>Results</h2>
+      <div id="per-question"></div>
+      <div id="overall" class="summary"></div>
+      <div id="closing" style="margin-top:.5rem;font-style:italic"></div>
+    </div>
+  </div>
+
+  <script>
+    // Constants (Requirement 4: use constants at top)
+    const DESIRED = [5,4,3,2,4]; // desired answers for q1..q5
+    const TRUE_LOVE_THRESHOLD = 85; // percent
+    const FRIENDS_THRESHOLD = 60;   // percent
+    const RUN_AWAY_THRESHOLD = 30;  // percent
+
+    // validate(values) single function for all questions (Requirement 4)
+    function validate(values){
+      const errors = [];
+      for(let i=0;i<values.length;i++){
+        const v = Number(values[i]);
+        if(!v || v < 1 || v > 5 || Number.isNaN(v)){
+          errors.push('Question ' + (i+1) + ' requires a value 1–5.');
+        }
+      }
+      return errors;
+    }
+
+    // compute per-question and overall compatibility
+    function computeCompatibility(answers){
+      // per-question: 100 - (abs diff / 4 * 100)
+      const per = answers.map((a,i)=>{
+        const diff = Math.abs(a - DESIRED[i]);
+        const pct = Math.round(100 - (diff/4)*100);
+        return {diff,pct};
+      });
+      const totalPct = Math.round(per.reduce((s,p)=>s+p.pct,0) / per.length);
+      return {per,totalPct};
+    }
+
+    // handle submit
+    document.getElementById('match-form').addEventListener('submit', function(e){
+      e.preventDefault();
+      const errorEl = document.getElementById('error'); errorEl.textContent = '';
+      const answers = [];
+      for(let i=1;i<=5;i++){ answers.push(document.getElementById('q'+i).value); }
+      const errors = validate(answers);
+      if(errors.length){
+        errorEl.textContent = errors.join(' ');
+        document.getElementById('results').hidden = true;
+        return;
+      }
+      const numeric = answers.map(x=>Number(x));
+      const res = computeCompatibility(numeric);
+
+      // display per-question summaries
+      const perEl = document.getElementById('per-question'); perEl.innerHTML = '';
+      res.per.forEach((p,i)=>{
+        const div = document.createElement('div'); div.className = 'per-q';
+        div.innerHTML = '<strong>Question ' + (i+1) + ':</strong> desired ' + DESIRED[i] + ', you answered ' + numeric[i] + '. Compatibility: ' + p.pct + '% (difference ' + p.diff + ')';
+        perEl.appendChild(div);
+      });
+
+      // overall
+      document.getElementById('overall').textContent = 'Overall compatibility: ' + res.totalPct + '%';
+
+      // closing remark based on thresholds
+      const closingEl = document.getElementById('closing');
+      if(res.totalPct >= TRUE_LOVE_THRESHOLD){
+        closingEl.textContent = 'Result: True love! You and I are an excellent match — let’s start planning adventures together.';
+      } else if(res.totalPct >= FRIENDS_THRESHOLD){
+        closingEl.textContent = 'Result: Possible friends — there is good compatibility; with time it might grow.';
+      } else if(res.totalPct >= RUN_AWAY_THRESHOLD){
+        closingEl.textContent = 'Result: Caution — differences are notable; you might be better as acquaintances.';
+      } else {
+        closingEl.textContent = 'Result: Run away! Our answers are quite different — unlikely a good match.';
+      }
+
+      document.getElementById('results').hidden = false;
+    });
+  </script>
+</body>
